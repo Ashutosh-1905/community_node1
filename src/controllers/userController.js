@@ -173,16 +173,18 @@ export const userExist = async (req, res, next) => {
     const { mobile } = req.body;
     // Check if mobile number is exits or not
     const isExistUser = await findUserByMobile(mobile);
-    if (!isExistUser) {
-      return next(
-        createHttpError(400, "This mobile number is not Exist Please Check it.")
-      );
-    } else {
+    if (isExistUser) {
       return res.status(200).json({
         message: "User Exist.",
         status: 1,
         response_code: 200,
       });
+    } else {
+       return res.status(400).json({
+         message: "User Not Exist.",
+         status: 0,
+         response_code: 400,
+       });
     }
   } catch (error) {
     return next(
