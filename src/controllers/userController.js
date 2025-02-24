@@ -68,7 +68,8 @@ export const register = async (req, res, next) => {
 
     return res.status(201).json({
       message: "User registered successfully.",
-      success: true,
+      status: 1,
+      response_code: 201,
       user,
       token,
     });
@@ -113,7 +114,8 @@ export const login = async (req, res, next) => {
 
     return res.status(200).json({
       message: "Login successful.",
-      success: true,
+      status: 1,
+      response_code: 200,
       token,
       user: {
         id: user._id,
@@ -132,7 +134,8 @@ export const logout = (req, res, next) => {
     res.clearCookie("token");
     return res.status(200).json({
       message: "Logout successful.",
-      success: true,
+      status: 1,
+      response_code: 200,
     });
   } catch (error) {
     return next(createHttpError(500, "Error during logout.", error));
@@ -141,7 +144,11 @@ export const logout = (req, res, next) => {
 
 export const profile = (req, res, next) => {
   try {
-    return res.status(200).json({ user: req.user });
+    return res.status(200).json({
+      status: 1,
+      response_code: 200,
+      user: req.user,
+    });
   } catch (error) {
     return next(createHttpError(500, "Error fetching profile.", error));
   }
@@ -150,8 +157,36 @@ export const profile = (req, res, next) => {
 export const getAllUsersController = async (req, res, next) => {
   try {
     const allUsers = await getAllUsers();
-    return res.status(200).json({ users: allUsers });
+    return res.status(200).json({
+      message: "All Users detail.",
+      status: 1,
+      response_code: 200,
+      users: allUsers,
+    });
   } catch (error) {
     return next(createHttpError(500, "Error fetching users.", error));
+  }
+};
+
+export const userExist = async (req, res, next) => {
+  try {
+    const { mobile } = req.body;
+    // Check if mobile number is exits or not
+    const isExistUser = await findUserByMobile(mobile);
+    if (!isExistUser) {
+      return next(
+        createHttpError(400, "This mobile number is not Exist Please Check it.")
+      );
+    } else {
+      return res.status(200).json({
+        message: "User Exist.",
+        status: 1,
+        response_code: 200,
+      });
+    }
+  } catch (error) {
+    return next(
+      createHttpError(500, "Error for checking user exist or not.", error)
+    );
   }
 };
