@@ -31,7 +31,7 @@ router.post(
   userController.login
 );
 
-router.get("/user_exist", userController.userExist);
+router.post("/user_exist", userController.userExist);
 router.get("/logout", authUser, userController.logout);
 router.get("/profile", authUser, userController.profile);
 router.get("/all", authUser, userController.getAllUsersController);

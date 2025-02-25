@@ -171,20 +171,43 @@ export const getAllUsersController = async (req, res, next) => {
 export const userExist = async (req, res, next) => {
   try {
     const { mobile } = req.body;
-    // Check if mobile number is exits or not
+
+    // Check if mobile number exists or not
     const isExistUser = await findUserByMobile(mobile);
-    if (isExistUser) {
+    if (!isExistUser) {
+      return res.status(200).json({
+        message: "User Not Exist.",
+        status: 0,
+        response_code: 200,
+      });
+    } else {
+      // Generate JWT token
+      const token = generateToken(isExistUser.email);
+
       return res.status(200).json({
         message: "User Exist.",
         status: 1,
         response_code: 200,
+        user: {
+          id: isExistUser._id,
+          name: isExistUser.name,
+          lastName: isExistUser.lastName,
+          mobile: isExistUser.mobile,
+          email: isExistUser.email,
+          age: isExistUser.age,
+          DOB: isExistUser.DOB,
+          gender: isExistUser.gender,
+          pincode: isExistUser.pincode,
+          city: isExistUser.city,
+          state: isExistUser.state,
+          familyMember: isExistUser.familyMember,
+          maritalStatus: isExistUser.maritalStatus,
+          education: isExistUser.education,
+          occupation: isExistUser.occupation,
+          isHeadOfFamily: isExistUser.isHeadOfFamily,
+        },
+        token,
       });
-    } else {
-       return res.status(400).json({
-         message: "User Not Exist.",
-         status: 0,
-         response_code: 400,
-       });
     }
   } catch (error) {
     return next(
