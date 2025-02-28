@@ -1,3 +1,4 @@
+import createHttpError from "http-errors";
 import User from "../models/userModel.js";
 import bcrypt from "bcrypt";
 
@@ -29,4 +30,31 @@ export const findUserByMobile = async (mobile) => {
 
 export const validatePassword = async (user, password) => {
   return await bcrypt.compare(password, user.password);
+};
+
+export const updateUserById = async (userId, updateData) => {
+  try {
+    const user = await User.findByIdAndUpdate(userId, updateData, {
+      new: true,
+      runValidators: true,
+    });
+    if (!user) {
+      throw createHttpError(404, "User not found.");
+    }
+    return user;
+  } catch (error) {
+    throw createHttpError(500, "Error updating user.", error);
+  }
+};
+
+export const deleteUserById = async (userId) => {
+  try {
+    const user = await User.findByIdAndDelete(userId);
+    if (!user) {
+      throw createHttpError(404, "User not found.");
+    }
+    return user;
+  } catch (error) {
+    throw createHttpError(500, "Error deleting user.", error);
+  }
 };
