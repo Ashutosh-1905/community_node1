@@ -1,12 +1,11 @@
 import jwt from "jsonwebtoken";
 import config from "../config/config.js";
 
-const generateToken = (email) => {
+const generateToken = (userId) => {
   try {
-    const token = jwt.sign({ email }, config.jwtSecret, {
-      expiresIn: "1h",
+    return jwt.sign({ id: userId }, config.jwtSecret, {
+      expiresIn: "7d",
     });
-    return token;
   } catch (error) {
     throw new Error("Error while generating token.");
   }

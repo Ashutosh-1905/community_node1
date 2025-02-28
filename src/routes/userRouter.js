@@ -5,6 +5,7 @@ import { authUser } from "../middlewares/authMiddleware.js";
 
 const router = Router();
 
+// User Register Route
 router.post(
   "/register",
   [
@@ -16,6 +17,7 @@ router.post(
   userController.register
 );
 
+// User Login Route
 router.post(
   "/login",
   [
@@ -31,9 +33,22 @@ router.post(
   userController.login
 );
 
-router.post("/user_exist", userController.userExist);
+// User Logout Route
 router.get("/logout", authUser, userController.logout);
-router.get("/profile", authUser, userController.profile);
+
+// User Exists Route
+router.post("/user_exist", userController.userExist);
+
+// All Users Route
 router.get("/all", authUser, userController.getAllUsersController);
+
+// User Profile Route
+router.get("/profile/:userId", authUser, userController.profile);
+
+// Update Profile Route
+router.put("/profile/:userId", authUser, userController.updateProfile);
+
+// Delete Account Route
+router.delete("/account/:userId", authUser, userController.deleteAccount);
 
 export default router;
