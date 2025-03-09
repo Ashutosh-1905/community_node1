@@ -5,7 +5,6 @@ import {
   getAllUsers,
   findUserByEmail,
   findUserByMobile,
-  validatePassword,
 } from "../services/user.service.js";
 
 export const register = async (req, res, next) => {
@@ -15,7 +14,6 @@ export const register = async (req, res, next) => {
       lastName,
       mobile,
       email,
-      password,
       age,
       DOB,
       gender,
@@ -27,6 +25,7 @@ export const register = async (req, res, next) => {
       education,
       occupation,
       isHeadOfFamily,
+      village,
     } = req.body;
 
     // Check if mobile number is already registered
@@ -49,7 +48,6 @@ export const register = async (req, res, next) => {
       lastName,
       mobile,
       email,
-      password,
       age,
       DOB,
       gender,
@@ -61,6 +59,7 @@ export const register = async (req, res, next) => {
       education,
       occupation,
       isHeadOfFamily,
+      village,
     });
 
     // Generate JWT token
@@ -68,7 +67,8 @@ export const register = async (req, res, next) => {
 
     return res.status(201).json({
       message: "User registered successfully.",
-      success: true,
+      status: 1,
+      response_code: 201,
       user,
       token,
     });
@@ -81,7 +81,7 @@ export const register = async (req, res, next) => {
 
 export const login = async (req, res, next) => {
   try {
-    const { email, mobile, password } = req.body;
+    const { email, mobile } = req.body;
 
     // Check if either email or mobile is provided
     if (!email && !mobile) {
@@ -102,18 +102,13 @@ export const login = async (req, res, next) => {
       return next(createHttpError(404, "User not found."));
     }
 
-    // Validate password
-    const isPasswordValid = await validatePassword(user, password);
-    if (!isPasswordValid) {
-      return next(createHttpError(400, "Invalid password."));
-    }
-
     // Generate JWT token
     const token = generateToken(user.email);
 
     return res.status(200).json({
       message: "Login successful.",
-      success: true,
+      status: 1,
+      response_code: 200,
       token,
       user: {
         id: user._id,
@@ -132,7 +127,8 @@ export const logout = (req, res, next) => {
     res.clearCookie("token");
     return res.status(200).json({
       message: "Logout successful.",
-      success: true,
+      status: 1,
+      response_code: 200,
     });
   } catch (error) {
     return next(createHttpError(500, "Error during logout.", error));
@@ -141,7 +137,11 @@ export const logout = (req, res, next) => {
 
 export const profile = (req, res, next) => {
   try {
-    return res.status(200).json({ user: req.user });
+    return res.status(200).json({
+      status: 1,
+      response_code: 200,
+      user: req.user,
+    });
   } catch (error) {
     return next(createHttpError(500, "Error fetching profile.", error));
   }
@@ -150,8 +150,36 @@ export const profile = (req, res, next) => {
 export const getAllUsersController = async (req, res, next) => {
   try {
     const allUsers = await getAllUsers();
-    return res.status(200).json({ users: allUsers });
+    return res.status(200).json({
+      message: "All Users detail.",
+      status: 1,
+      response_code: 200,
+      users: allUsers,
+    });
   } catch (error) {
     return next(createHttpError(500, "Error fetching users.", error));
+  }
+};
+
+export const userExist = async (req, res, next) => {
+  try {
+    const { mobile } = req.body;
+    // Check if mobile number exists or not
+    const isExistUser = await findUserByMobile(mobile);
+    if (!isExistUser) {
+      return next(
+        createHttpError(400, "This mobile number is not Exist Please Check it.")
+      );
+    } else {
+      return res.status(200).json({
+        message: "User Exist.",
+        status: 1,
+        response_code: 200,
+      });
+    }
+  } catch (error) {
+    return next(
+      createHttpError(500, "Error for checking user exist or not.", error)
+    );
   }
 };

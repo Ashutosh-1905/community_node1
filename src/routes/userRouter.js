@@ -7,12 +7,7 @@ const router = Router();
 
 router.post(
   "/register",
-  [
-    body("email").isEmail().withMessage("Invalid email address."),
-    body("password")
-      .isLength({ min: 3 })
-      .withMessage("Password must be at least 3 characters."),
-  ],
+  [body("email").isEmail().withMessage("Invalid email address.")],
   userController.register
 );
 
@@ -24,13 +19,11 @@ router.post(
       .optional()
       .isMobilePhone()
       .withMessage("Invalid mobile number."),
-    body("password")
-      .isLength({ min: 3 })
-      .withMessage("Password must be at least 3 characters."),
   ],
   userController.login
 );
 
+router.get("/user_exist", userController.userExist);
 router.get("/logout", authUser, userController.logout);
 router.get("/profile", authUser, userController.profile);
 router.get("/all", authUser, userController.getAllUsersController);
