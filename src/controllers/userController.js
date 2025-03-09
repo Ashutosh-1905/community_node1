@@ -5,9 +5,6 @@ import {
   getAllUsers,
   findUserByEmail,
   findUserByMobile,
-  validatePassword,
-  deleteUserById,
-  updateUserById,
 } from "../services/user.service.js";
 
 export const register = async (req, res, next) => {
@@ -17,7 +14,6 @@ export const register = async (req, res, next) => {
       lastName,
       mobile,
       email,
-      password,
       age,
       DOB,
       gender,
@@ -29,6 +25,7 @@ export const register = async (req, res, next) => {
       education,
       occupation,
       isHeadOfFamily,
+      village,
     } = req.body;
 
     // Check if mobile number is already registered
@@ -51,7 +48,6 @@ export const register = async (req, res, next) => {
       lastName,
       mobile,
       email,
-      password,
       age,
       DOB,
       gender,
@@ -63,6 +59,7 @@ export const register = async (req, res, next) => {
       education,
       occupation,
       isHeadOfFamily,
+      village,
     });
 
     // Generate JWT token
@@ -84,7 +81,7 @@ export const register = async (req, res, next) => {
 
 export const login = async (req, res, next) => {
   try {
-    const { email, mobile, password } = req.body;
+    const { email, mobile } = req.body;
 
     // Check if either email or mobile is provided
     if (!email && !mobile) {
@@ -105,14 +102,8 @@ export const login = async (req, res, next) => {
       return next(createHttpError(404, "User not found."));
     }
 
-    // Validate password
-    const isPasswordValid = await validatePassword(user, password);
-    if (!isPasswordValid) {
-      return next(createHttpError(400, "Invalid password."));
-    }
-
-    // Generate JWT token using user._id
-    const token = generateToken(user._id); // Use user._id, not user.email
+    // Generate JWT token
+    const token = generateToken(user.email);
 
     return res.status(200).json({
       message: "Login successful.",
@@ -146,98 +137,13 @@ export const logout = (req, res, next) => {
 
 export const profile = (req, res, next) => {
   try {
-    const userIdFromToken = req.user._id; // Authenticated user's ID from token
-    const userIdFromRequest = req.params.userId; // User ID from URL parameter
-
-    // console.log("userIdFromToken:", userIdFromToken); // Debugging
-    // console.log("userIdFromRequest:", userIdFromRequest); // Debugging
-
-    // Check if userIdFromRequest is provided
-    if (!userIdFromRequest) {
-      return next(createHttpError(400, "User ID is required."));
-    }
-
-    // Check if the authenticated user is trying to access their own profile
-    if (userIdFromToken.toString() !== userIdFromRequest.toString()) {
-      return next(
-        createHttpError(403, "You are not authorized to access this profile.")
-      );
-    }
-
-    const user = req.user.toObject ? req.user.toObject() : req.user; // Safe conversion
-    delete user.password; // Remove the password field
-
     return res.status(200).json({
       status: 1,
       response_code: 200,
-      user,
+      user: req.user,
     });
   } catch (error) {
     return next(createHttpError(500, "Error fetching profile.", error));
-  }
-};
-
-export const updateProfile = async (req, res, next) => {
-  try {
-    const userIdFromToken = req.user._id; // Authenticated user's ID from token
-    const userIdFromRequest = req.params.userId || req.body.userId; // User ID from request
-
-    // Check if the authenticated user is trying to update their own profile
-    if (userIdFromToken.toString() !== userIdFromRequest.toString()) {
-      return next(
-        createHttpError(403, "You are not authorized to update this profile.")
-      );
-    }
-
-    const updateData = req.body; // Data to update
-
-    // Update the user profile
-    const updatedUser = await updateUserById(userIdFromRequest, updateData);
-
-    if (!updatedUser) {
-      return next(createHttpError(404, "User not found."));
-    }
-
-    return res.status(200).json({
-      message: "Profile updated successfully.",
-      status: 1,
-      response_code: 200,
-      user: updatedUser,
-    });
-  } catch (error) {
-    return next(createHttpError(500, "Error updating profile.", error));
-  }
-};
-
-export const deleteAccount = async (req, res, next) => {
-  try {
-    const userIdFromToken = req.user._id; // Authenticated user's ID from token
-    const userIdFromRequest = req.params.userId || req.body.userId; // User ID from request
-
-    // Check if the authenticated user is trying to delete their own account
-    if (userIdFromToken.toString() !== userIdFromRequest.toString()) {
-      return next(
-        createHttpError(403, "You are not authorized to delete this account.")
-      );
-    }
-
-    // Delete the user account
-    const deletedUser = await deleteUserById(userIdFromRequest);
-
-    if (!deletedUser) {
-      return next(createHttpError(404, "User not found."));
-    }
-
-    // Clear the token cookie (if applicable)
-    res.clearCookie("token");
-
-    return res.status(200).json({
-      message: "Account deleted successfully.",
-      status: 1,
-      response_code: 200,
-    });
-  } catch (error) {
-    return next(createHttpError(500, "Error deleting account.", error));
   }
 };
 
@@ -258,42 +164,17 @@ export const getAllUsersController = async (req, res, next) => {
 export const userExist = async (req, res, next) => {
   try {
     const { mobile } = req.body;
-
     // Check if mobile number exists or not
     const isExistUser = await findUserByMobile(mobile);
     if (!isExistUser) {
-      return res.status(200).json({
-        message: "User Not Exist.",
-        status: 0,
-        response_code: 200,
-      });
+      return next(
+        createHttpError(400, "This mobile number is not Exist Please Check it.")
+      );
     } else {
-      // Generate JWT token
-      const token = generateToken(isExistUser.email);
-
       return res.status(200).json({
         message: "User Exist.",
         status: 1,
         response_code: 200,
-        user: {
-          id: isExistUser._id,
-          name: isExistUser.name,
-          lastName: isExistUser.lastName,
-          mobile: isExistUser.mobile,
-          email: isExistUser.email,
-          age: isExistUser.age,
-          DOB: isExistUser.DOB,
-          gender: isExistUser.gender,
-          pincode: isExistUser.pincode,
-          city: isExistUser.city,
-          state: isExistUser.state,
-          familyMember: isExistUser.familyMember,
-          maritalStatus: isExistUser.maritalStatus,
-          education: isExistUser.education,
-          occupation: isExistUser.occupation,
-          isHeadOfFamily: isExistUser.isHeadOfFamily,
-        },
-        token,
       });
     }
   } catch (error) {

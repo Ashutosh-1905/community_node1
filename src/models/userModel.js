@@ -26,11 +26,11 @@ const userSchema = new Schema(
       minLength: [6, "Email must be at least 6 characters long"],
       maxLength: [50, "Email must not be longer than 50 characters"],
     },
-    password: {
-      type: String,
-      required: [true, "Password must be required."],
-      select: false,
-    },
+    // password: {
+    //   type: String,
+    //   required: [true, "Password must be required."],
+    //   select: false,
+    // },
     age: {
       type: Number,
       required: [true, "Age is required."],
@@ -66,7 +66,7 @@ const userSchema = new Schema(
     },
 
     maritalStatus: {
-      type: Boolean,
+      type: String,
       required: [true, "maritalStatus is required."],
     },
     education: {
@@ -80,6 +80,10 @@ const userSchema = new Schema(
     isHeadOfFamily: {
       type: Boolean,
       required: [true, "is Head of family member."],
+    },
+
+    village: {
+      type: String,
     },
   },
   { timestamps: true }
