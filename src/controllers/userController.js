@@ -1,6 +1,6 @@
 import User from "../models/userModel.js";
 
-export const createUser = async (userData) => {
+export const register = async (userData) => {
   const user = await User.create(userData);
   return user;
 };
