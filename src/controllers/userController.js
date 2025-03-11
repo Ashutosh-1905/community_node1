@@ -34,7 +34,7 @@ export const register = async (req, res, next) => {
       return res.status(400).json({
         message: "This mobile number is already registered.",
         status: 0,
-        response_code: 400,
+        response_code: 200,
       });
     }
 
@@ -44,7 +44,7 @@ export const register = async (req, res, next) => {
       return res.status(400).json({
         message: "This email is already registered.",
         status: 0,
-        response_code: 400,
+        response_code: 200,
       });
     }
 
@@ -173,10 +173,10 @@ export const userExist = async (req, res, next) => {
     // Check if mobile number exists or not
     const isExistUser = await findUserByMobile(mobile);
     if (!isExistUser) {
-      return res.status(400).json({
+      return res.status(404).json({
         message: "This mobile number is not registered.",
         status: 0,
-        response_code: 400,
+        response_code: 404,
       });
     } else {
       return res.status(200).json({
