@@ -71,10 +71,10 @@ export const register = async (req, res, next) => {
     // Generate JWT token
     const token = generateToken(user.email);
 
-    return res.status(201).json({
+    return res.status(200).json({
       message: "User registered successfully.",
       status: 1,
-      response_code: 201,
+      response_code: 200,
       user,
       token,
     });
